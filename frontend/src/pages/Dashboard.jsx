@@ -1,363 +1,211 @@
-// function Dashboard() {
+import { useEffect, useState, useRef } from "react";
+import api from "../api";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+import { toPng } from "html-to-image";
 
-//   const user = JSON.parse(
-//     localStorage.getItem("user")
-//   );
-
-//   if (!user) {
-//     window.location.href = "/login";
-//     return null;
-//   }
-
-//   const logout = () => {
-//     localStorage.removeItem("user");
-//     window.location.href = "/login";
-//   };
-
-//   return (
-//     <>
-//       <div className="container">
-
-//         <div className="card">
-
-//           <div className="logo">
-//             <div className="logo-circle">S</div>
-//           <h2 style={{ color: "black" }}>SuperSage</h2>
-//           </div>
-// <h1 style={{ color: "black" }}>
-//   Welcome Back, {user?.name} 👋
-// </h1>
-
-//           <div className="profile">
-
-//             <h2>Profile Information</h2>
-
-//             <div className="info-row">
-//               <span>Name</span>
-//               <strong>{user?.name}</strong>
-//             </div>
-
-//             <div className="info-row">
-//               <span>Email</span>
-//               <strong>{user?.email}</strong>
-//             </div>
-
-//             <div className="info-row">
-//               <span>Status</span>
-//               <strong>Active</strong>
-//             </div>
-
-//             <div className="info-row">
-//               <span>Last Login</span>
-//               <strong>Today</strong>
-//             </div>
-
-//             <div className="info-row">
-//               <span>Date</span>
-//               <strong>
-//                 {new Date().toLocaleDateString()}
-//               </strong>
-//             </div>
-
-//           </div>
-
-//           <button onClick={logout}>
-//             Logout
-//           </button>
-
-//         </div>
-
-//       </div>
-
-//       <style>{`
-//         .container {
-//           min-height: 100vh;
-//           display: flex;
-//           justify-content: center;
-//           align-items: center;
-//           background: linear-gradient(
-//             135deg,
-//             #eef2ff,
-//             #f8fafc
-//           );
-//           padding: 20px;
-//         }
-
-//         .card {
-//           width: 500px;
-//           background: white;
-//           padding: 35px;
-//           border-radius: 16px;
-//           box-shadow: 0 15px 40px rgba(0,0,0,0.12);
-//         }
-
-//         .logo {
-//           display: flex;
-//           flex-direction: column;
-//           align-items: center;
-//           margin-bottom: 20px;
-//         }
-
-//         .logo-circle {
-//           width: 60px;
-//           height: 60px;
-//           border-radius: 50%;
-//           background: #2563eb;
-//           color: white;
-//           display: flex;
-//           justify-content: center;
-//           align-items: center;
-//           font-size: 28px;
-//           font-weight: bold;
-//           margin-bottom: 10px;
-//         }
-
-//         .logo h2 {
-//           margin: 0;
-//         }
-
-//         h1 {
-//           text-align: center;
-//           margin-bottom: 25px;
-//           font-size: 28px;
-//         }
-
-//         .profile {
-//           background: #f8fafc;
-//           padding: 20px;
-//           border-radius: 12px;
-//           margin-bottom: 20px;
-//         color: #111827;
-//         }
-
-//         .profile h2 {
-//           margin-top: 0;
-//           margin-bottom: 20px;
-//           color: #111827;
-//         }
-
-//         .info-row {
-//           display: flex;
-//           justify-content: space-between;
-//           padding: 14px 0;
-//           border-bottom: 1px solid #e5e7eb;
-//         }
-
-//         .info-row:last-child {
-//           border-bottom: none;
-//         }
-
-//         .info-row span {
-//           color: #6b7280;
-//         }
-
-//         .info-row strong {
-//           color: #111827;
-//         }
-
-//         button {
-//           width: 100%;
-//           padding: 12px;
-//           background: #2563eb;
-//           color: white;
-//           border: none;
-//           border-radius: 8px;
-//           cursor: pointer;
-//           font-size: 16px;
-//         }
-
-//         button:hover {
-//           background: #1d4ed8;
-//         }
-//       `}</style>
-//     </>
-//   );
-// }
-
-// export default Dashboard;
 function Dashboard() {
+  const dashboardRef = useRef(null);
 
-  const user = JSON.parse(
-    localStorage.getItem("user")
-  );
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const darkMode = localStorage.getItem("darkMode") === "true";
 
-  if (
-    !user ||
-    !user.name ||
-    !user.email
-  ) {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [members, setMembers] = useState([]);
+  const [pendingPayments, setPendingPayments] = useState([]);
+
+  const exportDashboard = async () => {
+    try {
+      if (!dashboardRef.current) return;
+      const dataUrl = await toPng(dashboardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+      });
+      const link = document.createElement("a");
+      link.download = "dashboard.png";
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error(error);
+      alert("Export failed");
+    }
+  };
+
+  useEffect(() => {
+    Promise.all([
+      api.get("/dashboard"),
+      api.get("/members"),
+      api.get("/payments"),
+    ])
+      .then(([dashRes, membersRes, paymentsRes]) => {
+        setDashboardData(dashRes.data);
+        setMembers(membersRes.data);
+        setPendingPayments(
+          paymentsRes.data.filter((p) => p.status === "Pending")
+        );
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  if (!user) {
     window.location.href = "/login";
     return null;
   }
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    window.location.href = "/login";
-  };
+  if (!dashboardData) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  const activeMembers = members.filter((m) => m.status === "Active").length;
+  const inactiveMembers = members.filter((m) => m.status !== "Active").length;
+
+  const memberChartData = [
+    { status: "Active", count: activeMembers },
+    { status: "Inactive", count: inactiveMembers },
+  ];
 
   return (
-    <>
-      <div className="container">
-
-        <div className="card">
-
-          <div className="logo">
-            <div className="logo-circle">S</div>
-            <h2 style={{ color: "black" }}>
-              SuperSage
-            </h2>
-          </div>
-
-          <h1 style={{ color: "black" }}>
-            Welcome Back, {user.name} 
+    <div
+      ref={dashboardRef}
+      className={`p-8 min-h-screen ${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+      }`}
+    >
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1
+            className={`text-3xl font-bold ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Dashboard Overview
           </h1>
-
-          <p className="subtitle">
-            Manage your account information and profile details.
-          </p>
-
-          <div className="profile">
-
-            <h2>Profile Information</h2>
-
-            <div className="info-row">
-              <span>Name</span>
-              <strong>{user.name}</strong>
-            </div>
-
-            <div className="info-row">
-              <span>Email</span>
-              <strong>{user.email}</strong>
-            </div>
-
-            <div className="info-row">
-              <span>Status</span>
-              <span className="status">Active</span>
-            </div>
-
-            <div className="info-row">
-              <span>Last Login</span>
-              <strong>Today</strong>
-            </div>
-
-            <div className="info-row">
-              <span>Date</span>
-              <strong>
-                {new Date().toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric"
-                })}
-              </strong>
-            </div>
-
-          </div>
-
-          <button onClick={logout}>
-            Logout
-          </button>
-
+          <p className="text-gray-500">Welcome back, {user?.name}</p>
         </div>
 
+        <button
+          onClick={exportDashboard}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Export Report
+        </button>
       </div>
 
-      <style>{`
-        .container {
-          min-height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background: linear-gradient(
-            135deg,
-            #eef2ff,
-            #f8fafc
-          );
-          padding: 20px;
-        }
+      {/* SESSION TOKEN */}
+      {user?.token && (
+        <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm">
+          <p className="text-xs text-gray-500 mb-1">Session Token</p>
+          <p className="text-sm font-mono break-all text-gray-700 dark:text-gray-300">
+            {user.token}
+          </p>
+        </div>
+      )}
 
-        .card {
-          width: 500px;
-          background: white;
-          padding: 35px;
-          border-radius: 16px;
-          box-shadow: 0 15px 40px rgba(0,0,0,0.12);
-        }
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
+          <p className="text-gray-500">Revenue</p>
+          <h2 className="text-3xl font-bold">${dashboardData.revenue}</h2>
+        </div>
 
-        .logo {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 20px;
-        }
+        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
+          <p className="text-gray-500">Members</p>
+          <h2 className="text-3xl font-bold">{dashboardData.members}</h2>
+        </div>
 
-        .logo-circle {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          background: #2563eb;
-          color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 28px;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
+        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
+          <p className="text-gray-500">Profit</p>
+          <h2 className="text-3xl font-bold">${dashboardData.profit}</h2>
+        </div>
+      </div>
 
-        .subtitle {
-          text-align: center;
-          color: #6b7280;
-          margin-top: -10px;
-          margin-bottom: 25px;
-        }
+      {/* MIDDLE SECTION */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
+          <h3 className="text-xl font-semibold mb-4">Member Overview</h3>
+          <p className="text-gray-500">Active Members</p>
+          <p className="text-2xl font-bold">{activeMembers}</p>
+          <p className="text-gray-400 mt-2">{inactiveMembers} inactive</p>
+        </div>
 
-        .profile {
-          background: #f8fafc;
-          padding: 20px;
-          border-radius: 12px;
-          margin-bottom: 20px;
-        }
+        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
+          <div className="flex justify-between mb-4">
+            <h3 className="text-xl font-semibold">Member Status</h3>
+            <span className="text-gray-500 text-sm">
+              {members.length} total
+            </span>
+          </div>
 
-        .profile h2 {
-          color: #111827;
-        }
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={memberChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar
+                  dataKey="count"
+                  fill="#2563eb"
+                  radius={[6, 6, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
 
-        .info-row {
-          display: flex;
-          justify-content: space-between;
-          padding: 14px 0;
-          border-bottom: 1px solid #e5e7eb;
-        }
+      {/* PENDING PAYMENTS */}
+      <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
+        <div className="flex justify-between mb-4">
+          <h3 className="text-xl font-semibold">Pending Payments</h3>
+          <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm">
+            {pendingPayments.length}
+          </span>
+        </div>
 
-        .info-row:last-child {
-          border-bottom: none;
-        }
-
-        .info-row span {
-          color: #374151;
-          font-weight: 500;
-        }
-
-        .status {
-          background: #dcfce7;
-          color: #166534;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        button {
-          width: 100%;
-          padding: 12px;
-          background: #2563eb;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-        }
-      `}</style>
-    </>
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 text-gray-500 font-medium">Member</th>
+              <th className="text-gray-500 font-medium">Amount</th>
+              <th className="text-gray-500 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pendingPayments.map((payment) => (
+              <tr key={payment._id} className="border-b">
+                <td className="py-3">{payment.name}</td>
+                <td>${payment.amount}</td>
+                <td>
+                  <span className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm">
+                    {payment.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {pendingPayments.length === 0 && (
+              <tr>
+                <td colSpan="3" className="py-6 text-center text-gray-500">
+                  No pending payments
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 

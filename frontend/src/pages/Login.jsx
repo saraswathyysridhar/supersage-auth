@@ -1,182 +1,3 @@
-// import { useState } from "react";
-// import axios from "axios";
-// import { useNavigate, Link } from "react-router-dom";
-
-// function Login() {
-//   const navigate = useNavigate();
-
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-
-//   const handleLogin = async () => {
-//     try {
-//       const response = await axios.post(
-//         "http://127.0.0.1:8000/login",
-//         {
-//           name: "",
-//           email,
-//           password,
-//         }
-//       );
-
-//       localStorage.setItem(
-//         "user",
-//         JSON.stringify(response.data)
-//       );
-
-//       navigate("/dashboard");
-
-//     } catch (error) {
-//       console.log(error);
-//       alert("Login failed");
-//     }
-//   };
-
-//   return (
-//     <>
-//       <div className="container">
-//         <div className="card">
-
-//           <div className="logo">
-//             <div className="logo-circle">S</div>
-//             <h2>SuperSage</h2>
-//           </div>
-
-//           <h1 style={{ color: "black" }}>
-//             Login
-// </h1>
-
-//           <p>Welcome back to SuperSage</p>
-
-//           <input
-//             type="email"
-//             placeholder="Email"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//           />
-
-//           <input
-//             type="password"
-//             placeholder="Password"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//           />
-
-//           <button onClick={handleLogin}>
-//             Login
-//           </button>
-
-//           <p className="bottom-link">
-//             Don't have an account?
-//             <Link to="/signup"> Sign Up</Link>
-//           </p>
-
-//         </div>
-//       </div>
-
-//       <style>{`
-//         .container {
-//           height: 100vh;
-//           display: flex;
-//           justify-content: center;
-//           align-items: center;
-//           background: linear-gradient(
-//             135deg,
-//             #eef2ff,
-//             #f8fafc
-//           );
-//         }
-
-//         .card {
-//           width: 400px;
-//           background: white;
-//           padding: 30px;
-//           border-radius: 16px;
-//           box-shadow: 0 15px 40px rgba(0,0,0,0.12);
-//         }
-
-//         .logo {
-//           display: flex;
-//           flex-direction: column;
-//           align-items: center;
-//           margin-bottom: 25px;
-//         }
-
-//         .logo-circle {
-//           width: 60px;
-//           height: 60px;
-//           border-radius: 50%;
-//           background: #2563eb;
-//           color: white;
-//           display: flex;
-//           justify-content: center;
-//           align-items: center;
-//           font-size: 24px;
-//           font-weight: bold;
-//           margin-bottom: 10px;
-//         }
-
-//         .logo h2 {
-//           margin: 0;
-//           color:black;
-//         }
-
-//         h1 {
-//           text-align: center;
-//           margin-bottom: 20px;
-//         }
-
-//         p {
-//           text-align: center;
-//           color: black;
-//           margin-bottom: 20px;
-//         }
-
-//         input {
-//           width: 100%;
-//           padding: 12px;
-//           margin-bottom: 15px;
-//           border: 1px solid #ddd;
-//           border-radius: 8px;
-//           box-sizing: border-box;
-//         }
-
-//         input:focus {
-//           outline: none;
-//           border-color: #2563eb;
-//         }
-
-//         button {
-//           width: 100%;
-//           padding: 12px;
-//           background: #2563eb;
-//           color: white;
-//           border: none;
-//           border-radius: 8px;
-//           cursor: pointer;
-//           font-size: 16px;
-//         }
-
-//         button:hover {
-//           background: #1d4ed8;
-//         }
-
-//         .bottom-link {
-//           text-align: center;
-//           margin-top: 20px;
-//         }
-
-//         .bottom-link a {
-//           color: #2563eb;
-//           text-decoration: none;
-//           font-weight: bold;
-//         }
-//       `}</style>
-//     </>
-//   );
-// }
-
-// export default Login;
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
@@ -188,9 +9,26 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    if (!email.trim()) {
+      alert("Email is required");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email");
+      return;
+    }
+
+    if (!password.trim()) {
+      alert("Password is required");
+      return;
+    }
+
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/login",
+        "http://localhost:8000/login",
         {
           name: "",
           email,
@@ -200,15 +38,19 @@ function Login() {
 
       if (response.data.message === "Login successful") {
         localStorage.setItem(
-          "user",
-          JSON.stringify(response.data)
-        );
+  "user",
+  JSON.stringify(response.data)
+);
+
+localStorage.setItem(
+  "token",
+  response.data.token
+);
 
         navigate("/dashboard");
       } else {
         alert(response.data.message);
       }
-
     } catch (error) {
       console.log(error);
       alert("Login failed");
@@ -216,126 +58,124 @@ function Login() {
   };
 
   return (
-    <>
-      <div className="container">
-        <div className="card">
+    <div className="min-h-screen bg-white">
+      <header className="h-16 border-b border-gray-200 flex items-center justify-between px-8">
+        <h1 className="text-3xl font-bold text-blue-600">
+          SuperSage
+        </h1>
 
-          <div className="logo">
-            <div className="logo-circle">S</div>
-            <h2 style={{ color: "black" }}>SuperSage</h2>
+        <Link
+          to="/signup"
+          className="border border-blue-200 text-blue-600 px-5 py-2 rounded-lg text-sm font-semibold"
+        >
+          Sign Up
+        </Link>
+      </header>
+
+      <div className="grid md:grid-cols-2 min-h-[calc(100vh-64px)]">
+
+        <div className="bg-[#f7f9fc] flex items-center px-12">
+          <div className="max-w-md">
+
+            <div className="w-16 h-16 rounded-xl bg-blue-600 text-white flex items-center justify-center text-3xl font-bold mb-8 shadow-lg">
+              S
+            </div>
+
+            <h2 className="text-6xl font-bold text-gray-900 leading-tight mb-8">
+              Join the future
+              <br />
+              of intelligence
+            </h2>
+
+            <p className="text-gray-500 text-xl leading-9 mb-10">
+              Experience the next generation of AI-driven
+              insights. Streamline your workflow and unlock
+              potential with SuperSage.
+            </p>
+
+            <div className="flex items-center gap-4">
+              <div className="flex -space-x-2">
+                <div className="w-10 h-10 rounded-full border bg-blue-100"></div>
+                <div className="w-10 h-10 rounded-full border bg-gray-100"></div>
+                <div className="w-10 h-10 rounded-full border bg-orange-100"></div>
+              </div>
+
+              <span className="text-sm text-gray-500">
+                Trusted by 10k+ professionals
+              </span>
+            </div>
+
           </div>
-
-          <h1 style={{ color: "black" }}>
-            Login
-          </h1>
-
-          <p>Welcome back to SuperSage</p>
-
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <button onClick={handleLogin}>
-            Login
-          </button>
-
-          <p className="bottom-link">
-            Don't have an account?
-            <Link to="/signup"> Sign Up</Link>
-          </p>
-
         </div>
+
+        <div className="bg-[#fafbfc] flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+
+            <h2 className="text-4xl font-bold text-center text-gray-900 mb-2">
+              Welcome Back
+            </h2>
+
+            <p className="text-center text-gray-500 mb-8">
+              Login to access your dashboard
+            </p>
+
+            <div className="space-y-5">
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+
+                <input
+                  type="email"
+                  placeholder="your-email@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+
+                <input
+                  type="password"
+                  placeholder="••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+          
+              <button
+                onClick={handleLogin}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl"
+              >
+                Login
+              </button>
+
+            </div>
+
+            <hr className="my-8" />
+
+            <p className="text-center text-gray-500">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="text-blue-600 font-semibold"
+              >
+                Sign Up
+              </Link>
+            </p>
+
+          </div>
+        </div>
+
       </div>
-
-      <style>{`
-        .container {
-          height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background: linear-gradient(
-            135deg,
-            #eef2ff,
-            #f8fafc
-          );
-        }
-
-        .card {
-          width: 400px;
-          background: white;
-          padding: 30px;
-          border-radius: 16px;
-          box-shadow: 0 15px 40px rgba(0,0,0,0.12);
-        }
-
-        .logo {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 25px;
-        }
-
-        .logo-circle {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          background: #2563eb;
-          color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 24px;
-          font-weight: bold;
-          margin-bottom: 10px;
-        }
-
-        p {
-          text-align: center;
-          color: black;
-          margin-bottom: 20px;
-        }
-
-        input {
-          width: 100%;
-          padding: 12px;
-          margin-bottom: 15px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          box-sizing: border-box;
-        }
-
-        button {
-          width: 100%;
-          padding: 12px;
-          background: #2563eb;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-        }
-
-        .bottom-link {
-          text-align: center;
-          margin-top: 20px;
-        }
-
-        .bottom-link a {
-          color: #2563eb;
-          text-decoration: none;
-          font-weight: bold;
-        }
-      `}</style>
-    </>
+    </div>
   );
 }
 
