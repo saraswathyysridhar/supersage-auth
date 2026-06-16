@@ -1,5 +1,15 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
+import {
+  LayoutGrid,
+  Users,
+  CreditCard,
+  BarChart3,
+  Settings as SettingsIcon,
+  LogOut,
+  Sparkles,
+} from "lucide-react";
 import api from "../api";
+import Topbar from "../components/Topbar";
 
 function Layout() {
   const location = useLocation();
@@ -15,52 +25,58 @@ function Layout() {
     }
   };
 
-  const navItem = (path, label) => (
+  const links = [
+    { path: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+    { path: "/members", label: "Members", icon: Users },
+    { path: "/payments", label: "Payments", icon: CreditCard },
+    { path: "/analytics", label: "Analytics", icon: BarChart3 },
+    { path: "/settings", label: "Settings", icon: SettingsIcon },
+  ];
+
+  const navItem = ({ path, label, icon: Icon }) => (
     <Link
       key={path}
       to={path}
-      className={`block px-4 py-3 rounded-xl transition ${
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
         location.pathname === path
-          ? "bg-blue-600 text-white"
-          : "text-gray-700 hover:bg-gray-100"
+          ? "bg-blue-50 text-blue-600"
+          : "text-gray-500 hover:bg-gray-50"
       }`}
     >
+      <Icon size={18} />
       {label}
     </Link>
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r p-6">
-
-        <h1 className="text-2xl font-bold text-blue-600 mb-8">
-          SuperSage
-        </h1>
-
-        <div className="space-y-2">
-          {navItem("/dashboard", "Dashboard")}
-          {navItem("/members", "Members")}
-          {navItem("/payments", "Payments")}
-          {navItem("/analytics", "Analytics")}
-          {navItem("/settings", "Settings")}
+      <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 flex flex-col p-5">
+        <div className="flex items-center gap-2 mb-8 px-2">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <Sparkles size={16} className="text-white" />
+          </div>
+          <span className="text-lg font-bold text-gray-900 dark:text-white">
+            SuperSage
+          </span>
         </div>
+
+        <div className="flex-1 space-y-1">{links.map(navItem)}</div>
 
         <button
           onClick={logout}
-          className="w-full mt-6 bg-red-500 text-white py-3 rounded-xl hover:bg-red-600 transition"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
+          <LogOut size={18} />
           Logout
         </button>
-
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
+        <Topbar />
         <Outlet />
       </div>
-
     </div>
   );
 }

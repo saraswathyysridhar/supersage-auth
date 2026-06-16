@@ -9,8 +9,10 @@ import {
 } from "recharts";
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
+import { Download, DollarSign, CheckCircle2, Clock, Search, FileText } from "lucide-react";
+import StatCard from "../components/StatCard";
 
-const COLORS = ["#22c55e", "#f59e0b"];
+const COLORS = ["#2563eb", "#f59e0b"];
 
 function Payments() {
   const [payments, setPayments] = useState([]);
@@ -105,72 +107,59 @@ function Payments() {
       className={`p-8 min-h-screen ${
         darkMode
           ? "bg-gray-900 text-white"
-          : "bg-gray-100 text-black"
+          : "bg-gray-50 text-black"
       }`}
     >
       {/* HEADER */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1
-            className={`text-3xl font-bold ${
+            className={`text-2xl font-bold ${
               darkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Payments
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 text-sm mt-1">
             Revenue and payment tracking
           </p>
         </div>
 
         <button
           onClick={exportPayments}
-          className="bg-green-600 text-white px-5 py-3 rounded-xl hover:bg-green-700"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 text-sm font-medium"
         >
+          <Download size={16} />
           Export Report
         </button>
       </div>
 
       {/* KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
-          <p className="text-gray-500">Total Revenue</p>
-          <h2 className="text-3xl font-bold mt-2">
-            ${totalRevenue}
-          </h2>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
-          <p className="text-gray-500">Paid</p>
-          <h2 className="text-3xl font-bold text-green-600 mt-2">
-            {paidCount}
-          </h2>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
-          <p className="text-gray-500">Pending</p>
-          <h2 className="text-3xl font-bold text-yellow-600 mt-2">
-            {pendingCount}
-          </h2>
-        </div>
+        <StatCard icon={DollarSign} label="Total Revenue" value={`$${totalRevenue}`} />
+        <StatCard icon={CheckCircle2} label="Paid" value={paidCount} />
+        <StatCard icon={Clock} label="Pending" value={pendingCount} />
       </div>
 
       {/* MAIN CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* PAYMENT TABLE */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 dark:text-white rounded-2xl shadow-sm p-6">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 dark:text-white rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-base font-semibold">
               Payment History
             </h2>
 
-            <input
-              type="text"
-              placeholder="Search payments..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-2 w-72 text-white"
-            />
+            <div className="relative w-72">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search payments..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border border-gray-200 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 dark:text-white"
+              />
+            </div>
           </div>
 
           {loading ? (
@@ -180,11 +169,11 @@ function Payments() {
           ) : (
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b">
-                  <th className="py-3">Member</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                <tr className="border-b border-gray-100 dark:border-gray-700">
+                  <th className="py-2 text-gray-400 text-xs font-medium uppercase tracking-wide">Member</th>
+                  <th className="text-gray-400 text-xs font-medium uppercase tracking-wide">Amount</th>
+                  <th className="text-gray-400 text-xs font-medium uppercase tracking-wide">Status</th>
+                  <th className="text-gray-400 text-xs font-medium uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
 
@@ -192,16 +181,16 @@ function Payments() {
                 {filteredPayments.map((payment, index) => (
                   <tr
                     key={payment._id || index}
-                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    <td className="py-4">{payment.name}</td>
-                    <td>${payment.amount}</td>
+                    <td className="py-4 text-sm font-medium">{payment.name}</td>
+                    <td className="text-sm">${payment.amount}</td>
                     <td>
                       <span
                         className={
                           payment.status === "Paid"
-                            ? "bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm"
-                            : "bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm"
+                            ? "bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-medium"
+                            : "bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full text-xs font-medium"
                         }
                       >
                         {payment.status}
@@ -210,8 +199,9 @@ function Payments() {
                     <td>
                       <button
                         onClick={() => createInvoice(payment)}
-                        className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm"
+                        className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100 text-xs font-medium"
                       >
+                        <FileText size={14} />
                         Invoice
                       </button>
                     </td>
@@ -234,8 +224,8 @@ function Payments() {
         </div>
 
         {/* PIE CHART */}
-        <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">
+        <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+          <h2 className="text-base font-semibold mb-4">
             Payment Breakdown
           </h2>
 

@@ -10,6 +10,8 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { Users, DollarSign, Activity, Repeat } from "lucide-react";
+import StatCard from "../components/StatCard";
 
 function Analytics() {
   const [dashboard, setDashboard] = useState(null);
@@ -71,20 +73,20 @@ function Analytics() {
   return (
     <div
       className={`p-8 min-h-screen ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-black"
       }`}
     >
       {/* HEADER */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1
-            className={`text-3xl font-bold ${
+            className={`text-2xl font-bold ${
               darkMode ? "text-white" : "text-gray-900"
             }`}
           >
             Analytics
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 text-sm mt-1">
             Performance insights and growth trends
           </p>
         </div>
@@ -92,61 +94,42 @@ function Analytics() {
 
       {/* KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
-          <p className="text-gray-500">Total Members</p>
-          <h2 className="text-3xl font-bold mt-2">{totalMembers}</h2>
-          <p className="text-blue-500 mt-2">{activeMembers} active</p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
-          <p className="text-gray-500">Revenue</p>
-          <h2 className="text-3xl font-bold mt-2">${totalRevenue}</h2>
-          <p className="text-green-600 mt-2">{paidCount} paid</p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
-          <p className="text-gray-500">Engagement</p>
-          <h2 className="text-3xl font-bold mt-2">{engagementRate}%</h2>
-          <p className="text-gray-400 mt-2">active members</p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 dark:text-white p-6 rounded-2xl shadow-sm">
-          <p className="text-gray-500">Retention</p>
-          <h2 className="text-3xl font-bold mt-2">{retentionRate}%</h2>
-          <p className="text-gray-400 mt-2">payments paid</p>
-        </div>
+        <StatCard icon={Users} label="Total Members" value={totalMembers} delta={Number(engagementRate)} deltaLabel="active" />
+        <StatCard icon={DollarSign} label="Revenue" value={`$${totalRevenue}`} />
+        <StatCard icon={Activity} label="Engagement" value={`${engagementRate}%`} />
+        <StatCard icon={Repeat} label="Retention" value={`${retentionRate}%`} />
       </div>
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* MEMBER STATUS */}
-        <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-6">Member Status</h2>
+        <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+          <h2 className="text-base font-semibold mb-6">Member Status</h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={memberChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="status" />
-                <YAxis allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="status" axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} maxBarSize={48} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* PAYMENT AMOUNTS */}
-        <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-6">Payment Amounts</h2>
+        <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+          <h2 className="text-base font-semibold mb-6">Payment Amounts</h2>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={paymentChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                <YAxis axisLine={false} tickLine={false} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="amount" fill="#22c55e" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="amount" fill="#2563eb" radius={[6, 6, 0, 0]} maxBarSize={48} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -154,27 +137,27 @@ function Analytics() {
       </div>
 
       {/* INSIGHTS */}
-      <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-6">Performance Insights</h2>
+      <div className="bg-white dark:bg-gray-800 dark:text-white rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+        <h2 className="text-base font-semibold mb-6">Performance Insights</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-xl">
-            <h3 className="font-semibold mb-2">Member Activity</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+          <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-xl border border-gray-100 dark:border-gray-600">
+            <h3 className="font-semibold mb-2 text-sm">Member Activity</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
               {activeMembers} out of {totalMembers} members are currently active.
             </p>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-xl">
-            <h3 className="font-semibold mb-2">Payment Status</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+          <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-xl border border-gray-100 dark:border-gray-600">
+            <h3 className="font-semibold mb-2 text-sm">Payment Status</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
               {paidCount} of {totalPayments} payments have been completed.{" "}
               {totalPayments - paidCount} pending.
             </p>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-xl">
-            <h3 className="font-semibold mb-2">Revenue</h3>
-            <p className="text-gray-600 dark:text-gray-300">
+          <div className="bg-gray-50 dark:bg-gray-700 p-5 rounded-xl border border-gray-100 dark:border-gray-600">
+            <h3 className="font-semibold mb-2 text-sm">Revenue</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
               Total revenue collected is ${totalRevenue}. Estimated profit is $
               {dashboard?.profit?.toFixed(0) ?? 0}.
             </p>
